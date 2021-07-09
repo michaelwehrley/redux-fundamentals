@@ -46,7 +46,11 @@ const logEnhancer = (createStore) => (reducer, initialState, enhancer) => {
 };
 
 // const store = createStore(reducer, monitorEnhancer);
-const store = createStore(reducer, logEnhancer);
+// const store = createStore(reducer, logEnhancer);
+// or
+const composedEnhancer = compose(monitorEnhancer, logEnhancer);
+const store = createStore(reducer, composedEnhancer);
+
 store.dispatch({ type: HELLO })
 
 function App() {
