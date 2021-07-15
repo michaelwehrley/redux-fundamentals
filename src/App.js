@@ -6,6 +6,9 @@ import {
   bindActionCreators
 } from "redux";
 
+// import logger from 'redux-logger'; `prev state`/`action`/`next state`
+// import thunk from 'redux-thunk';
+
 const HELLO = "HELLO";
 
 const reducer = (state = { hello: "hi" }, action) => {
@@ -34,10 +37,10 @@ const monitorEnhancer = (createStore) => (reducer, initialState, enhancer) => {
 
 const logEnhancer = (createStore) => (reducer, initialState, enhancer) => {
   const logReducer = (state, action) => {
-    console.log("OLD state", state);
+    console.log("OLD state (enhancer)", state);
     console.log("action", action.type);
     const newState = reducer(state, action);
-    console.log("NEW state", newState);
+    console.log("NEW state (enhancer)", newState);
 
     return newState;
   }
@@ -49,7 +52,22 @@ const logEnhancer = (createStore) => (reducer, initialState, enhancer) => {
 // const store = createStore(reducer, logEnhancer);
 // or
 const composedEnhancer = compose(monitorEnhancer, logEnhancer);
-const store = createStore(reducer, composedEnhancer);
+
+const logMiddleware = store => next => action => {
+  console.log("OLD state (middlewhare)", store.getState());
+  next(action);
+  console.log("NEW state (middlewhare)", store.getState());
+}
+
+const monitorMiddleware = store => next => action => {
+  const start = performance.now()
+  next(action);
+  const end = performance.now()
+  const diff = end - start;
+  console.log("performance ", diff)
+}
+
+const store = createStore(reducer, applyMiddleware(logMiddleware, monitorMiddleware));
 
 store.dispatch({ type: HELLO })
 
